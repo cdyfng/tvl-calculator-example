@@ -6,6 +6,7 @@
   "dependencies": {
     "@solana/web3.js": "^1.24.0",
     "bn.js": "^5.2.0",
-    "buffer-layout": "^1.2.2"
+    "buffer-layout": "^1.2.2",
+    "node-cmd": "^5.0.0"
   }
 }

@@ -1,6 +1,7 @@
 const { PublicKey, Connection } = require("@solana/web3.js");
 const { BN } = require("bn.js");
 const { ObligationParser } = require("./obligation");
+var cmd = require("node-cmd");
 
 const connection = new Connection(
   "https://api.mainnet-beta.solana.com",
@@ -14,17 +15,34 @@ const RESERVES_TO_ASSET_MAP = {
   BgxfHJDzm44T7XG68MYKx7YisTjZu73tVovyZSjJMpmw: "USDC",
   "3PArRsZQ6SLkr1WERZWyC6AqsajtALMq4C66ZMYz4dKQ": "ETH",
   GYzjMCXTDue12eUGKKWAqtF5jcBYNmewr6Db6LaguEaX: "BTC",
+  "5suXmvdbKQ98VonxGCXqViuWRu8k4zgZRxndYKsH2fJg": "SRM",
+  "8K9WC8xoh2rtQNY7iEGXtPvfbDCi563SdWhCAhuMP2xE": "USDT",
+  "2dC4V23zJxuv521iYQj8c471jrxYLNQFaGS6YPwtTHMd": "FTT",
 };
 
+const sleep = (n) => new Promise((res, rej) => setTimeout(res, n));
 async function main() {
-  const [totalDeposits, totalBorrows] = await getTotalDepositsAndBorrows();
-  console.log("Total Deposits:");
-  for (const [reserve, balance] of Object.entries(totalDeposits)) {
-    console.log(reserve, balance.toString());
-  }
-  console.log("Total Borrows:");
-  for (const [reserve, balance] of Object.entries(totalBorrows)) {
-    console.log(reserve, balance.toString());
+  while (1) {
+    let srmDeposits, srmBorrows;
+    const [totalDeposits, totalBorrows] = await getTotalDepositsAndBorrows();
+    console.log("Total Deposits:");
+    for (const [reserve, balance] of Object.entries(totalDeposits)) {
+      console.log(reserve, balance.toString());
+      if (reserve == "SRM") srmDeposits = balance;
+    }
+    console.log("Total Borrows:");
+    for (const [reserve, balance] of Object.entries(totalBorrows)) {
+      console.log(reserve, balance.toString());
+      if (reserve == "SRM") srmBorrows = balance;
+    }
+
+    const srmLeft = (srmDeposits.sub(srmBorrows) / Math.pow(10, 6)).toFixed(0);
+    console.log("SRM left:", srmLeft);
+    if (srmLeft > 1000) {
+      cmd.runSync("say " + "SRM剩余" + srmLeft);
+    }
+    //console.log(srmDeposits, srmBorrows, srmDeposits.sub(srmBorrows)/Math.pow(10, 6))
+    await sleep(10000);
   }
 }
 
